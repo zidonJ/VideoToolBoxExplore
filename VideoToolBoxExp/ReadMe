@@ -1,0 +1,7 @@
+
+AVCaptureDeviceType
+
+AVCaptureDeviceTypeBuiltInMicrophone   麦克风
+AVCaptureDeviceTypeBuiltInWideAngleCamera 内置广角相机
+AVCaptureDeviceTypeBuiltInTelephotoCamera 内置长焦相机
+
