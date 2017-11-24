@@ -128,6 +128,7 @@ static NSString * const videoUrl =
     if (!videoConnection) {
         NSLog(@"录像错误");
     }
+
 }
 
 #pragma mark -- AVCapturePhotoCaptureDelegate
@@ -173,24 +174,27 @@ didFinishProcessingPhotoSampleBuffer:(nullable CMSampleBufferRef)photoSampleBuff
 - (void)captureOutput:(AVCaptureOutput *)output didOutputSampleBuffer:(CMSampleBufferRef)sampleBuffer fromConnection:(AVCaptureConnection *)connection
 {
     NSLog(@"录像啦");
-    CVImageBufferRef imageBuffer =  CMSampleBufferGetImageBuffer(sampleBuffer);
+    CVImageBufferRef imageBuffer = CMSampleBufferGetImageBuffer(sampleBuffer);
     CVPixelBufferLockBaseAddress(imageBuffer,0);
     size_t width = CVPixelBufferGetWidthOfPlane(imageBuffer, 0);
     size_t height = CVPixelBufferGetHeightOfPlane(imageBuffer, 0);
     size_t bytesPerRow = CVPixelBufferGetBytesPerRowOfPlane(imageBuffer, 0);
     //视频缓冲区中是YUV格式的,要从缓冲区中提取luma部分
     uint8_t *lumaBuffer = CVPixelBufferGetBaseAddressOfPlane(imageBuffer, 0);
-    
+
     CGColorSpaceRef grayColorSpace = CGColorSpaceCreateDeviceGray();
     CGContextRef context = CGBitmapContextCreate(lumaBuffer, width, height, 8, bytesPerRow, grayColorSpace, kCGImageAlphaNone);
-    
+
     CGImageRef dstImage = CGBitmapContextCreateImage(context);
 
-    UIImage *image = [UIImage imageWithCGImage:dstImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp];
+    // 解锁pixel buffer
+    CVPixelBufferUnlockBaseAddress(imageBuffer,0);
+    
+    UIImage *image = [UIImage imageWithCGImage:dstImage scale:[UIScreen mainScreen].scale orientation:UIImageOrientationUp*3];
     _imgView.image = image;
 //    NSLog(@"%@",image);
 //    _customPreviewLayer.contents = (__bridge id _Nullable)(image.CGImage);
-
+    
     CGImageRelease(dstImage);
     CGContextRelease(context);
     CGColorSpaceRelease(grayColorSpace);
